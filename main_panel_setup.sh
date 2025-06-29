@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GitHub repo
-REPO_URL="https://github.com/sawaikh/yt-smart-bot.git"
+REPO_URL="https://github.com/sawaikh/website-traffic-bot.git"
 
 echo "📁 Cloning panel backend..."
 git clone "$REPO_URL" panel
