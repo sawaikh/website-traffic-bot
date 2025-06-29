@@ -1,61 +1,64 @@
 import requests
-import json
+import time
 
 from config import PANEL_IP
 
-def run_task():
-    url = input("🔗 Enter website URL: ")
-    duration = input("⏳ Enter time in seconds to stay on site: ")
-    click = input("🖱️ Click on ads? (yes/no): ")
+BASE_URL = f"http://{PANEL_IP}:8000"
 
-    payload = {
+def run_task():
+    url = input("🔗 Website URL: ")
+    duration = input("⏱️ Time on page (seconds): ")
+    click_ad = input("🖱️ Click on Ad? (yes/no): ").lower()
+
+    task_data = {
         "url": url,
-        "duration": duration,
-        "click_ads": click
+        "duration": int(duration),
+        "click_ad": click_ad == "yes"
     }
 
+    print("🚀 Sending task to all VPS...")
     try:
-        res = requests.post(f"http://{PANEL_IP}:8000/run_task", json=payload)
-        if res.status_code == 200:
-            print("✅ Task sent to VPS")
-        else:
-            print("❌ Failed to send task.")
+        res = requests.post(f"{BASE_URL}/run_task", json=task_data)
+        print("✅ Task result:")
+        print(res.json())
     except Exception as e:
-        print("❌ Error:", e)
+        print("❌ Error sending task:", e)
 
-def show_status():
+def check_status():
     try:
-        res = requests.get(f"http://{PANEL_IP}:8000/vps_status")
+        res = requests.get(f"{BASE_URL}/vps_status")
         data = res.json()
-        online = len(data)
-        print(f"🟢 Online: {online} VPS")
-        for ip in data:
-            print(" -", ip)
+        print(f"🟢 Online: {data['online']} | 🔴 Offline: {data['offline']} | Total: {data['total']}")
     except Exception as e:
         print("❌ Status check error:", e)
 
 def update_script():
     try:
-        res = requests.post(f"http://{PANEL_IP}:8000/update_script")
-        print("📦 Update command sent to all VPS")
+        res = requests.post(f"{BASE_URL}/update_script")
+        print("📦 Update started on all VPS.")
     except Exception as e:
         print("❌ Update error:", e)
 
-while True:
-    print("\n🧠 OPTIONS:")
-    print("1️⃣  Run Task")
-    print("2️⃣  Show VPS Online Status")
-    print("3️⃣  Auto-Update Bot Script")
-    print("0️⃣  Exit")
+def main():
+    while True:
+        print("\n🧠 OPTIONS:")
+        print("1️⃣  Run Task")
+        print("2️⃣  Show VPS Online Status")
+        print("3️⃣  Update All VPS Scripts")
+        print("0️⃣  Exit")
+        choice = input("👉 Enter choice: ")
 
-    choice = input("👉 Enter choice: ")
-    if choice == "1":
-        run_task()
-    elif choice == "2":
-        show_status()
-    elif choice == "3":
-        update_script()
-    elif choice == "0":
-        break
-    else:
-        print("❌ Invalid choice.")
+        if choice == "1":
+            run_task()
+        elif choice == "2":
+            check_status()
+        elif choice == "3":
+            update_script()
+        elif choice == "0":
+            print("👋 Exiting...")
+            break
+        else:
+            print("❌ Invalid choice, try again.")
+
+if __name__ == "__main__":
+    main()
