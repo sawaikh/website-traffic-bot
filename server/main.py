@@ -1,40 +1,46 @@
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 import uvicorn
 
 app = FastAPI()
 
-# In-memory store for connected VPS
-vps_registry = {}
+# Store connected VPS status
+vps_status = {}
 
-# Allow all origins for now
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+class StatusRequest(BaseModel):
+    vps_id: str
+    status: str  # 'online' or 'offline'
 
-@app.post("/register_vps")
-async def register_vps(request: Request):
-    data = await request.json()
-    ip = data.get("ip")
-    if ip:
-        vps_registry[ip] = {"status": "online"}
-    return {"status": "registered", "ip": ip}
+class TaskStatus(BaseModel):
+    vps_id: str
+    success: bool
+    message: str
+
+@app.get("/ping")
+def ping():
+    return {"message": "pong"}
+
+@app.post("/report_status")
+async def report_status(data: StatusRequest):
+    vps_status[data.vps_id] = data.status
+    return {"message": "Status updated"}
 
 @app.get("/vps_status")
-async def vps_status():
-    return vps_registry
+def get_vps_status():
+    total = len(vps_status)
+    online = sum(1 for status in vps_status.values() if status == 'online')
+    offline = total - online
+    return {
+        "online": online,
+        "offline": offline,
+        "total": total
+    }
 
-@app.post("/run_task")
-async def run_task(request: Request):
-    task_data = await request.json()
-    return {"status": "task received", "task": task_data}
-
-@app.post("/update_script")
-async def update_script():
-    return {"status": "update triggered"}
+@app.post("/report_task")
+async def report_task_status(data: TaskStatus):
+    print(f"✅ Task Report from {data.vps_id}: {'Success' if data.success else 'Failed'} - {data.message}")
+    return {"message": "Received"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
