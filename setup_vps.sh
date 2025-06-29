@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # GitHub repo URL
-REPO_URL="https://github.com/sawaikh/yt-smart-bot.git"
+REPO_URL="https://github.com/sawaikh/website-traffic-bot.git"
 
 # Get latest PANEL_IP from GitHub
-PANEL_IP=$(curl -s https://raw.githubusercontent.com/sawaikh/yt-smart-bot/main/client/config.py | grep PANEL_IP | cut -d '"' -f2)
+PANEL_IP=$(curl -s https://raw.githubusercontent.com/sawaikh/website-traffic-bot/main/client/config.py | grep PANEL_IP | cut -d '"' -f2)
 
 echo "🌐 Panel IP detected: $PANEL_IP"
 
