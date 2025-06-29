@@ -1,1 +1,1 @@
-PANEL_IP = "YOUR_PANEL_IP"  # Replace this automatically from GitHub
+PANEL_IP = "34.94.26.44"  # Replace this automatically from GitHub
